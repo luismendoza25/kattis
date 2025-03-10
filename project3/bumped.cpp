@@ -3,8 +3,8 @@
 
 
 struct City{   
-    int number;
-    int price;
+    int number = -1;
+    int price = -1;
 };
 
 struct edge{
