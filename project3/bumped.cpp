@@ -80,7 +80,7 @@ class minheap{
 
 
 int minCost(int n, int m, int f, int s, int t, std::vector<std::vector<Edge>> &roads, std::vector<std::vector<Edge>> &flights){
-    int infinity = 1e9;
+    long long infinity = 1e15;
     std::vector<std::vector<int>> dist(n, std::vector<int>(2, infinity));
     minheap heap;
 
@@ -90,9 +90,6 @@ int minCost(int n, int m, int f, int s, int t, std::vector<std::vector<Edge>> &r
     while(!heap.empty()){
         City current = heap.remove();
 
-        if(current.number == -1){
-            break;
-        }
         if(current.number == t){
             return current.price;
         }
@@ -111,19 +108,20 @@ int minCost(int n, int m, int f, int s, int t, std::vector<std::vector<Edge>> &r
                 Edge edge = roads[current.number][i];
                 int addedPrice = current.price + edge.price;
                 if (addedPrice < dist[edge.to][findex]){
-                    dist[edge.to][current.flight] = addedPrice;
+                    dist[edge.to][findex] = addedPrice;
                     heap.insert({edge.to, addedPrice, current.flight});
                 }
             }
         }
 
-        
-        if(!current.flight){
-            for (size_t j = 0; j < flights[current.number].size(); j++){
-                Edge plane = flights[current.number][j];
-                if(current.price <= dist[plane.to][1]){
-                    dist[plane.to][1] = current.price;
-                    heap.insert({plane.to, current.price, true});
+        if(current.number >= 0 && current.number < n){
+            if(!current.flight){
+                for (size_t j = 0; j < flights[current.number].size(); j++){
+                    Edge plane = flights[current.number][j];
+                    if(current.price <= dist[plane.to][1]){
+                        dist[plane.to][1] = current.price;
+                        heap.insert({plane.to, current.price, true});
+                    }
                 }
             }
         }
