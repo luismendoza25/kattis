@@ -61,7 +61,7 @@ class minheap{
 
     City remove(){
         if (heap.empty()){
-            return City();
+            return {-1,-1,false};
         }
         City first = heap.front();
         heap[0] = heap.back();
@@ -80,7 +80,8 @@ class minheap{
 
 
 int minCost(int n, int m, int f, int s, int t, std::vector<std::vector<Edge>> &roads, std::vector<std::vector<Edge>> &flights){
-    std::vector<std::vector<int> dist(n, std::vector<int>(2, 1e20));
+    int infinity = 1e9;
+    std::vector<std::vector<int>> dist(n, std::vector<int>(2, infinity));
     minheap heap;
 
     heap.insert({s, 0, false});
@@ -88,34 +89,47 @@ int minCost(int n, int m, int f, int s, int t, std::vector<std::vector<Edge>> &r
 
     while(!heap.empty()){
         City current = heap.remove();
-        if(current == t){
-            return current.price();
+
+        if(current.number == -1){
+            break;
         }
-        if(current.price > dist[current.number][current.flight]){
+        if(current.number == t){
+            return current.price;
+        }
+
+
+        int findex = 0;
+        if(current.flight){
+            findex = 1;
+        }
+        if(current.price > dist[current.number][findex]){
             continue;
         }
 
-        for (size_t i =0; i < roads[current.number]; i++){
-            Edge edge = roads[current.number][i];
-            int addedPrice = current.price + edge.price;
-            if (addedPrice < dist[edge.to][current.flight]){
-                dist[edge.to][current.flight] = addedPrice;
-                heap.insert({edge.to, addedPrice, current.flight});
+        if(current.number >= 0 && current.number < n){
+            for (size_t i =0; i < roads[current.number].size(); i++){
+                Edge edge = roads[current.number][i];
+                int addedPrice = current.price + edge.price;
+                if (addedPrice < dist[edge.to][findex]){
+                    dist[edge.to][current.flight] = addedPrice;
+                    heap.insert({edge.to, addedPrice, current.flight});
+                }
             }
         }
 
+        
         if(!current.flight){
             for (size_t j = 0; j < flights[current.number].size(); j++){
                 Edge plane = flights[current.number][j];
-                if(current.cost < dist[plane.to][1]){
-                    dist[flight.to][1] = current.cost;
-                    heap.insert({flight.to, current.cost, true});
+                if(current.price <= dist[plane.to][1]){
+                    dist[plane.to][1] = current.price;
+                    heap.insert({plane.to, current.price, true});
                 }
             }
         }
     }
 
-    return 1e20;
+    return infinity;
 }
 
 int main(){
@@ -125,17 +139,17 @@ int main(){
     std::vector<std::vector<Edge>> roads(n);
     std::vector<std::vector<Edge>> flights(n);
 
-    for(int k =0; i < m; k ++){
+    for(int k =0; k < m; k ++){
         int i, j, c;
-        std::cin >> i >> c >> j;
-        roads[i].push_back({j, c});
-        roads[j].push_back({i, c});
+        std::cin >> i >> j >> c;
+        roads[i].push_back(Edge{c, j});
+        roads[j].push_back(Edge{c, i});
     }
 
-    for (int i = 0; i < f; i++){
+    for (int p = 0; p < f; p++){
         int u, v;
         std::cin >> u >> v;
-        roads[u].push_back({v,0});
+        flights[u].push_back(Edge{0,v});
     }
      
 
