@@ -5,9 +5,10 @@
 struct City{   
     int number = -1;
     int price = -1;
+    bool flight = false;
 };
 
-struct edge{
+struct Edge{
     int price;
     int to;
 };
@@ -76,3 +77,67 @@ class minheap{
         return heap.empty();
     }
 };
+
+
+int minCost(int n, int m, int f, int s, int t, std::vector<std::vector<Edge>> &roads, std::vector<std::vector<Edge>> &flights){
+    std::vector<std::vector<int> dist(n, std::vector<int>(2, 1e20));
+    minheap heap;
+
+    heap.insert({s, 0, false});
+    dist[s][0] = 0;
+
+    while(!heap.empty()){
+        City current = heap.remove();
+        if(current == t){
+            return current.price();
+        }
+        if(current.price > dist[current.number][current.flight]){
+            continue;
+        }
+
+        for (size_t i =0; i < roads[current.number]; i++){
+            Edge edge = roads[current.number][i];
+            int addedPrice = current.price + edge.price;
+            if (addedPrice < dist[edge.to][current.flight]){
+                dist[edge.to][current.flight] = addedPrice;
+                heap.insert({edge.to, addedPrice, current.flight});
+            }
+        }
+
+        if(!current.flight){
+            for (size_t j = 0; j < flights[current.number].size(); j++){
+                Edge plane = flights[current.number][j];
+                if(current.cost < dist[plane.to][1]){
+                    dist[flight.to][1] = current.cost;
+                    heap.insert({flight.to, current.cost, true});
+                }
+            }
+        }
+    }
+
+    return 1e20;
+}
+
+int main(){
+    int n, m, f, s, t;
+    std::cin >> n >> m >> f >> s >> t;
+
+    std::vector<std::vector<Edge>> roads(n);
+    std::vector<std::vector<Edge>> flights(n);
+
+    for(int k =0; i < m; k ++){
+        int i, j, c;
+        std::cin >> i >> c >> j;
+        roads[i].push_back({j, c});
+        roads[j].push_back({i, c});
+    }
+
+    for (int i = 0; i < f; i++){
+        int u, v;
+        std::cin >> u >> v;
+        roads[u].push_back({v,0});
+    }
+     
+
+    std::cout << minCost(n, m,f, s, t, roads, flights);
+}
