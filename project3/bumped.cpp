@@ -4,12 +4,12 @@
 
 struct City{   
     int number = -1;
-    int price = -1;
+    long long price = -1;
     bool flight = false;
 };
 
 struct Edge{
-    int price;
+    long long price;
     int to;
 };
 
@@ -81,7 +81,7 @@ class minheap{
 
 int minCost(int n, int m, int f, int s, int t, std::vector<std::vector<Edge>> &roads, std::vector<std::vector<Edge>> &flights){
     long long infinity = 1e15;
-    std::vector<std::vector<int>> dist(n, std::vector<int>(2, infinity));
+    std::vector<std::vector<long long>> dist(n, std::vector<long long>(2, infinity));
     minheap heap;
 
     heap.insert({s, 0, false});
@@ -106,7 +106,7 @@ int minCost(int n, int m, int f, int s, int t, std::vector<std::vector<Edge>> &r
         if(current.number >= 0 && current.number < n){
             for (size_t i =0; i < roads[current.number].size(); i++){
                 Edge edge = roads[current.number][i];
-                int addedPrice = current.price + edge.price;
+                long long addedPrice = current.price + edge.price;
                 if (addedPrice < dist[edge.to][findex]){
                     dist[edge.to][findex] = addedPrice;
                     heap.insert({edge.to, addedPrice, current.flight});
@@ -138,7 +138,8 @@ int main(){
     std::vector<std::vector<Edge>> flights(n);
 
     for(int k =0; k < m; k ++){
-        int i, j, c;
+        int i, j;
+        long long c;
         std::cin >> i >> j >> c;
         roads[i].push_back(Edge{c, j});
         roads[j].push_back(Edge{c, i});
