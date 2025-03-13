@@ -3,6 +3,7 @@
 #include <vector>
 #include <unordered_map>
 #include <queue>
+#include <set>
 
 std::vector<std::string> order(int n, std::vector<std::string> &rules, std::string file){
     std::vector<std::string> orders;
@@ -10,12 +11,15 @@ std::vector<std::string> order(int n, std::vector<std::string> &rules, std::stri
     std::unordered_map<std::string, std::vector<std::string>> neighbors;
     std::unordered_map<std::string, int> count;
 
+    std::set<std::string> files;
+
     for (int i=0; i < rules.size(); i++){
         std::stringstream ss(rules[i]);
         std::string listed;
         std::string dependent;
         ss >> listed;
         listed.pop_back();
+        files.insert(listed);
 
         if(count.find(listed) == count.end()){
             count[listed]=0;
@@ -24,13 +28,14 @@ std::vector<std::string> order(int n, std::vector<std::string> &rules, std::stri
         while( ss >> dependent){
             neighbors[dependent].push_back(listed);
             count[listed]++;
+            files.insert(dependent);
         }
     }
 
     std::queue<std::string> q;
     q.push(file);
-    std::unordered_map<std::string, bool> visited;
-    visited[file] = true;
+    std::set<std::string> visited;
+    visited.insert(file);
 
     while(!q.empty()){
         std::string current = q.front();
@@ -38,12 +43,11 @@ std::vector<std::string> order(int n, std::vector<std::string> &rules, std::stri
         orders.push_back(current);
 
         for(int i =0; i < neighbors[current].size(); i++){
-            if(!visited[neighbors[current][i]]){
-                count[neighbors[current][i]]--;
-
-                if(count[i] == 0){
-                    q.push(neighbors[current][i]);
-                    visited[neighbors[current][i]] = true;
+            if(visited.find(dependent) == visited.end()){
+                count[dependent]--;
+                if(count[dependent] == 0){
+                    q.push[dependent];
+                    visited.insert(dependent);
                 }
             }
         }
