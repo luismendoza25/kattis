@@ -7,28 +7,26 @@
 
 std::vector<std::string> order(int n, std::vector<std::string> &rules, std::string file){
     std::vector<std::string> orders;
-
-    std::unordered_map<std::string, std::vector<std::string>> neighbors;
+    std::unordered_map<std::string, std::vector<std::string>> dependencies;
     std::unordered_map<std::string, int> count;
-
     std::set<std::string> files;
+    
 
-    for (int i=0; i < rules.size(); i++){
+    for (int i=0; i < n; i++){
         std::stringstream ss(rules[i]);
         std::string listed;
-        std::string dependent;
         ss >> listed;
-        listed.pop_back();
+        if(!listed.empty() && listed.back()==':'){
+            listed.pop_back();
+        }
         files.insert(listed);
 
-        if(count.find(listed) == count.end()){
-            count[listed]=0;
-        } 
 
-        while( ss >> dependent){
-            neighbors[dependent].push_back(listed);
-            count[listed]++;
-            files.insert(dependent);
+        std::string dependency;
+        while(ss >> dependency){
+            dependencies[listed].push_back(dependency);
+            count[dependency]++;
+            files.insert(dependency);
         }
     }
 
@@ -42,17 +40,20 @@ std::vector<std::string> order(int n, std::vector<std::string> &rules, std::stri
         q.pop();
         orders.push_back(current);
 
-        for(int i =0; i < neighbors[current].size(); i++){
+        for(int i =0; i < dependencies[current].size(); i++){
+            std::string dependent = dependencies[current][i];
             if(visited.find(dependent) == visited.end()){
+                if(count.find(dependent) == count.end()){
+                    count[dependent]=0;
+                }
                 count[dependent]--;
                 if(count[dependent] == 0){
-                    q.push[dependent];
+                    q.push(dependent);
                     visited.insert(dependent);
                 }
             }
         }
     }
-
 
     return orders;
 }
@@ -64,7 +65,7 @@ int main(){
 
     std::vector<std::string> rules(n);
     for (int i =0; i < n; i++){
-        getline(std::cin, rules[i]);
+        std::getline(std::cin, rules[i]);
     }
 
     std::string file;
