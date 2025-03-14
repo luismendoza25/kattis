@@ -7,26 +7,29 @@
 
 std::vector<std::string> order(int n, std::vector<std::string> &rules, std::string file){
     std::vector<std::string> orders;
+
     std::unordered_map<std::string, std::vector<std::string>> dependencies;
     std::unordered_map<std::string, int> count;
-    std::set<std::string> files;
+
     
 
     for (int i=0; i < n; i++){
         std::stringstream ss(rules[i]);
         std::string listed;
         ss >> listed;
-        if(!listed.empty() && listed.back()==':'){
+        if(!listed.empty()){
             listed.pop_back();
         }
-        files.insert(listed);
+        
 
 
         std::string dependency;
         while(ss >> dependency){
-            dependencies[listed].push_back(dependency);
-            count[dependency]++;
-            files.insert(dependency);
+            dependencies[dependency].push_back(listed);
+            if(count.find(listed) == count.end()){
+            count[listed]=0;
+        } 
+            count[listed]++;
         }
     }
 
@@ -63,43 +66,18 @@ int main(){
     std::cin >> n;
     std::cin.ignore();
 
-    std::unordered_map<std::string, std::vector<std::string>> graph;
-    std::unordered_map<std::string, int> counts;
-    std::unordered_map<std::string> files;
-
-    for (int i = 0; i < n; i++){
-        std::string line;
-        std::string file;
-        std::string dependency;
-
-        std::getline(std::cin, line);
-
-        size_t colon = line.find(':');
-        file = line.substr(0, colon);
-        files.insert(file);
-        graph[file] = {};
-
-        size_t next = colon + 2;
-        while(next < line.size()){
-            size_t space = line.find(' ', next);
-            if (space == std::string::npos){
-                space = line.size()
-            }
-
-            dependent = line.substr(next, space - next);
-            graph[dependent].puh_back(file);
-            counts.insert(dependency);
-
-            next = space + 1;
-        }
+    std::vector<std::string> rules(n);
+    for (int i =0; i < n; i++){
+        getline(std::cin, rules[i]);
     }
 
-    std::string recomp;
-    std::cin >> recomp;
-    std::vector<std::string> order = orders(graph, counts, recomp);
+    std::string file;
+    std::cin >> file;
 
-    for(int i = 0; i < order.size(); i++){
-        std::cout << order[i] << "\n";
+    std::vector<std::string> fileOrders = order(n, rules, file);
+
+    for (int i =0; i < fileOrders.size(); i++){
+        std::cout << fileOrders[i] << "\n";
     }
 
     return 0;
