@@ -17,18 +17,18 @@ std::vector<std::string> order(int n, std::vector<std::string> &rules, std::stri
         std::stringstream ss(rules[i]);
         std::string listed;
         ss >> listed;
-        if(!listed.empty()){
+
+        if(!listed.empty() && listed.back() == ':'){
             listed.pop_back();
         }
         
-
+        if(count.find(listed) == count.end()){
+            count[listed] = 0;
+        }
 
         std::string dependency;
         while(ss >> dependency){
             dependencies[dependency].push_back(listed);
-            if(count.find(listed) == count.end()){
-            count[listed]=0;
-        } 
             count[listed]++;
         }
     }
@@ -45,15 +45,10 @@ std::vector<std::string> order(int n, std::vector<std::string> &rules, std::stri
 
         for(int i =0; i < dependencies[current].size(); i++){
             std::string dependent = dependencies[current][i];
-            if(visited.find(dependent) == visited.end()){
-                if(count.find(dependent) == count.end()){
-                    count[dependent]=0;
-                }
-                count[dependent]--;
-                if(count[dependent] == 0){
-                    q.push(dependent);
-                    visited.insert(dependent);
-                }
+            count[dependent]--;
+            if(count[dependent] == 0){
+                q.push(dependent);
+                visited.insert(dependent);
             }
         }
     }
