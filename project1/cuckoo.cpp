@@ -1,124 +1,62 @@
 #include <iostream>
 #include <vector>
+#include <unordered_set>
 
 
-class my_set{
-    private:
-        std::vector<int> table;
-        
+bool cuckoo(int n, std::vector<int> &table, int h1, int h2, int word){
+    int maxswaps = n;
+    std::unordered_set<int> visited;
 
-    public:
-
-        //checks if an element exists
-        bool search(int key){
-            for (int k : table){
-                if (k == key){
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        //insert used to track elements that have been visited
-        void insert(int key){
-            if (!search(key)){
-                table.push_back(key);
-            }
-
-        }
-
-        void clear(){
-            table.clear();
-        }
-
-};
-
-bool cuckoo(int m, int n, std::vector<std::pair<int, int>> &words){
-    std::vector<int> table(n, -1);
-    //my_set visited_words;
-
-    if (m > n){
-        return false;
-    }
-
-    for (int i = 0; i < m; i++){
-        int word = i;
-        int h1 = words[word].first;
-        int h2 = words[word].second;
-
-        my_set visited_words;
-        
-
-        if (h1 > n && h2 > n){
-            return false;
-        }
-
-
-        for(int counts = 0; counts < n; counts++){
-            if (table[h1] == -1){
-                table[h1] = word; //insert into h1
-                break;
-            }
-            else if(table[h2] == -1){
-                table[h2] = word; //insert into h2
-                break;
-            }
-
-            if (visited_words.search(word)){
-                return false;
-            }
-        
-            visited_words.insert(word);
-            
-
-            int evict = table[h1];
+    while(maxswaps--){
+        if(table[h1] == -1){
             table[h1] = word;
-            word = evict;
-
-            if (h1 == words[word].first) {
-                h1 = words[word].second;
-            } else {
-                h1 = words[word].first;
-            }
-
-            if (table[h1] == -1) {
-                table[h1] = word;
-                break;
-            }
-
+            return true;
         }
 
-        if (visited_words.search(word)){
+        if(table[h1] == -1){
+            table[h2] = word;
+            return true;
+        }
+    
+
+        int evicted = table[h1];
+        table[h1] = word;
+
+        if(visited.count(h1)){
             return false;
         }
-
+        visited.insert(h1);
+        word = evicted;
+        int temp = h1;
+        h1 =h2;
+        h2 = temp;
     }
-
-    return true;
-
+    return false;
 }
 
 
 int main(){
-
-    std::ios::sync_with_stdio(false); 
-    std::cin.tie(NULL);
-
     int tests;
     std::cin >> tests;
 
     while(tests--){
         int m, n;
         std::cin >> m >> n;
-        std::vector<std::pair<int, int>> words(m);
 
-        for (int i = 0; i < m; i++) {
-            std::cin >> words[i].first >> words[i].second;
+        std::vector<int> table(n, -1);
+        bool success = true;
+
+        for(int i = 0; i < m; i++){
+            int h1, h2;
+            std::cin >> h1 >> h2;
+            if(!cuckoo(n, table, h1, h2, i)){
+                success = false;
+            }
         }
-
-        if (cuckoo(m, n, words)) {
+        if(success){
             std::cout << "successful hashing" << "\n";
-        } else {
+        }
+        else{
             std::cout << "rehash necessary" << "\n";
         }
     }
