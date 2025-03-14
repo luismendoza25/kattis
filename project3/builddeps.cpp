@@ -63,18 +63,43 @@ int main(){
     std::cin >> n;
     std::cin.ignore();
 
-    std::vector<std::string> rules(n);
-    for (int i =0; i < n; i++){
-        std::getline(std::cin, rules[i]);
+    std::unordered_map<std::string, std::vector<std::string>> graph;
+    std::unordered_map<std::string, int> counts;
+    std::unordered_map<std::string> files;
+
+    for (int i = 0; i < n; i++){
+        std::string line;
+        std::string file;
+        std::string dependency;
+
+        std::getline(std::cin, line);
+
+        size_t colon = line.find(':');
+        file = line.substr(0, colon);
+        files.insert(file);
+        graph[file] = {};
+
+        size_t next = colon + 2;
+        while(next < line.size()){
+            size_t space = line.find(' ', next);
+            if (space == std::string::npos){
+                space = line.size()
+            }
+
+            dependent = line.substr(next, space - next);
+            graph[dependent].puh_back(file);
+            counts.insert(dependency);
+
+            next = space + 1;
+        }
     }
 
-    std::string file;
-    std::cin >> file;
+    std::string recomp;
+    std::cin >> recomp;
+    std::vector<std::string> order = orders(graph, counts, recomp);
 
-    std::vector<std::string> fileOrders = order(n, rules, file);
-
-    for (int i =0; i < fileOrders.size(); i++){
-        std::cout << fileOrders[i] << "\n";
+    for(int i = 0; i < order.size(); i++){
+        std::cout << order[i] << "\n";
     }
 
     return 0;
