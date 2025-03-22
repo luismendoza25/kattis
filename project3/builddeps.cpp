@@ -52,7 +52,7 @@ std::vector<std::string> order(int n, std::vector<std::string> &rules, std::stri
         stack.pop();
 
         if (dependencies.count(current)){
-            const std::vector<std::string> &dependents = dependencies[current];
+            const std::vector<std::string> &dependents = tracking[current];
             for(size_t i =0; i < dependents.size(); i++){
                 const std::string &dep = dependents[i];
                 if(!links.count(dep)){
