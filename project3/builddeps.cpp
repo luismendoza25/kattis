@@ -1,18 +1,30 @@
 #include <iostream>
-#include <sstream>
 #include <vector>
+#include <sstream>
 #include <unordered_map>
-#include <queue>
-#include <set>
+#include <stack>
+#include <unordered_set>
+#include <algorithm>
 
-std::vector<std::string> order(int n, std::vector<std::string> &rules, std::string file){
-    std::vector<std::string> orders;
+void search(const std::string &file, const std::unordered_map<std::string, std::vector<std::string>> &graph, std::unordered_set<std::string> &visited, std::vector<std::string> &temp){
+    visited.insert(file);
 
+    if (graph.count(file)){
+        const std::vector<std::string> &neighbors = graph.at(file);
+        for (size_t i = 0; i < neighbors.size(); i++){
+            const std::string &neighbor = neighbors[i];
+            if(!visited.count(neighbor)){
+                search(neighbor, graph, visited, temp);
+            }
+        }
+    }
+    temp.push_back(file);
+}
+
+std::vector<std::string> order(int n, std::vector<std::string> &rules, std::string refile){
     std::unordered_map<std::string, std::vector<std::string>> dependencies;
-    std::unordered_map<std::string, int> count;
-
+    std::unordered_map<std::string, std::vector<std::string>> tracking;
     
-
     for (int i=0; i < n; i++){
         std::stringstream ss(rules[i]);
         std::string listed;
@@ -21,39 +33,52 @@ std::vector<std::string> order(int n, std::vector<std::string> &rules, std::stri
         if(!listed.empty() && listed.back() == ':'){
             listed.pop_back();
         }
-        
-        if(count.find(listed) == count.end()){
-            count[listed] = 0;
-        }
 
         std::string dependency;
         while(ss >> dependency){
-            dependencies[dependency].push_back(listed);
-            count[listed]++;
+            dependencies[listed].push_back(dependency);
+            tracking[dependency].push_back(listed);
         }
     }
 
-    std::queue<std::string> q;
-    q.push(file);
-    std::set<std::string> visited;
-    visited.insert(file);
+    std::unordered_set<std::string> links;
+    std::stack <std::string> stack;
+    links.insert(refile);
+    stack.push(refile);
 
-    while(!q.empty()){
-        std::string current = q.front();
-        q.pop();
-        orders.push_back(current);
 
-        for(int i =0; i < dependencies[current].size(); i++){
-            std::string dependent = dependencies[current][i];
-            count[dependent]--;
-            if(count[dependent] == 0){
-                q.push(dependent);
-                visited.insert(dependent);
+    while(!stack.empty()){
+        std::string current = stack.top();
+        stack.pop();
+
+        if (dependencies.count(current)){
+            const std::vector<std::string> &dependents = dependencies[current];
+            for(size_t i =0; i < dependents.size(); i++){
+                const std::string &dep = dependents[i];
+                if(!links.count(dep)){
+                    links.insert(dep);
+                    stack.push(dep);
+                }
             }
         }
     }
 
-    return orders;
+    std::unordered_set<std::string> visited;
+    std::vector<std::string> result;
+    std::vector<std::string> vec(links.begin(), links.end());
+
+    for(size_t i =0; i < vec.size(); i++){
+        const std::string &file = vec[i];
+        if(!visited.count(file)){
+            search(file, tracking, visited, result);
+        }
+    }
+
+
+    std::reverse(result.begin(), result.end());
+
+
+    return result;
 }
 
 int main(){
